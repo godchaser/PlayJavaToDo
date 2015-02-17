@@ -1,11 +1,11 @@
 package controllers;
 
-import play.*;
-import play.data.Form;
-import play.mvc.*;
-
-import views.html.*;
 import models.Task;
+import play.Logger;
+import play.data.Form;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.index;
 
 public class Application extends Controller {
 
@@ -17,15 +17,24 @@ public class Application extends Controller {
     }
 
     public static Result tasks() {
+        Logger.debug("Here I am trying to get all tasks" + Task.all());
         return ok(index.render(Task.all(), taskForm));
     }
 
     public static Result newTask() {
-        return TODO;
+        Form<Task> filledForm = taskForm.bindFromRequest();
+        if (filledForm.hasErrors()) {
+            return badRequest(
+                    views.html.index.render(Task.all(), filledForm)
+            );
+        } else {
+            Task.create(filledForm.get());
+            return redirect(routes.Application.tasks());
+        }
     }
 
     public static Result deleteTask(Long id) {
-        return TODO;
+        Task.delete(id);
+        return redirect(routes.Application.tasks());
     }
-
 }
